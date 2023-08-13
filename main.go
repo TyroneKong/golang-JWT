@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 	controllers "web-service-gin/controller"
+	"web-service-gin/middlewares"
 	"web-service-gin/models"
 
 	"github.com/gin-gonic/gin"
@@ -30,13 +31,20 @@ func main() {
 	models.ConnectDataBase()
 	router := gin.Default()
 	router.Use(LoggerMiddleWare)
+	public := router.Group("/api")
 	// api := router.Group("/albums")
 	// api.Use(LoggerMiddleWare)
-	router.POST("/register", controllers.Register)
+	public.POST("/register", controllers.Register)
+	public.POST("/login", controllers.Login)
 	router.GET("albums", getAllAlbums)
 	router.GET("albums/:id", getAlbumById)
 	router.POST("albums", postAlbum)
 	router.DELETE("albums/:id", removeAlbumById)
+
+	protected := router.Group("/api/admin")
+	protected.Use(middlewares.JwtAuthMiddleware())
+	protected.GET("/user", controllers.CurrentUser)
+
 	router.Run("localhost:8080")
 
 	// looping in golang
