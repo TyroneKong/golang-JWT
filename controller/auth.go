@@ -21,6 +21,7 @@ type LoginInput struct {
 func Register(c *gin.Context) {
 	var input RegisterInput
 
+	// condition - checking if there is an error
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

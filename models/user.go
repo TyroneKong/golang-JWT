@@ -65,6 +65,7 @@ func LoginCheck(username string, password string) (string, error) {
 
 }
 
+// save user to db
 func (u *User) SaveUser() (*User, error) {
 	var err error
 	err = DB.Create(&u).Error

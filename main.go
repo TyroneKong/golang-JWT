@@ -8,6 +8,7 @@ import (
 	"web-service-gin/middlewares"
 	"web-service-gin/models"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -30,33 +31,29 @@ func main() {
 
 	models.ConnectDataBase()
 	router := gin.Default()
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Authorization"},
+		AllowCredentials: true,
+	}))
+
+	router.POST("/register", controllers.Register)
+	router.POST("/login", controllers.Login)
 	router.Use(LoggerMiddleWare)
-	public := router.Group("/api")
-	// api := router.Group("/albums")
-	// api.Use(LoggerMiddleWare)
-	public.POST("/register", controllers.Register)
-	public.POST("/login", controllers.Login)
-	router.GET("albums", getAllAlbums)
 	router.GET("albums/:id", getAlbumById)
 	router.POST("albums", postAlbum)
 	router.DELETE("albums/:id", removeAlbumById)
 
-	protected := router.Group("/api/admin")
+	// all routes in the protected group will use the jwt middleware
+	protected := router.Group("/api")
+
 	protected.Use(middlewares.JwtAuthMiddleware())
+	// protected.Use(token.CheckTokenExpiration())
+	protected.GET("/albums", getAllAlbums)
 	protected.GET("/user", controllers.CurrentUser)
 
 	router.Run("localhost:8080")
-
-	// looping in golang
-	for i := 0; i < len(albums); i++ {
-		fmt.Println(albums[i])
-	}
-
-	// index, values, range array
-	// by using underscore we tell go we are not using the index
-	for _, album := range albums {
-		fmt.Println(album)
-	}
 
 }
 
