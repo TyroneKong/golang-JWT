@@ -34,7 +34,6 @@ func main() {
 	//any route which uses any of the below groups will use the relevant middleware
 	public := router.Group("/api")
 	test := router.Group("/test")
-	// api.Use(LoggerMiddleWare)
 	public.POST("/register", controllers.Register)
 	public.POST("/login", controllers.Login)
 
