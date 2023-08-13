@@ -30,17 +30,22 @@ func main() {
 
 	models.ConnectDataBase()
 	router := gin.Default()
-	router.Use(LoggerMiddleWare)
+
+	//any route which uses any of the below groups will use the relevant middleware
 	public := router.Group("/api")
-	// api := router.Group("/albums")
+	test := router.Group("/test")
 	// api.Use(LoggerMiddleWare)
 	public.POST("/register", controllers.Register)
 	public.POST("/login", controllers.Login)
-	router.GET("albums", getAllAlbums)
+
+	// test will use /test/albums
+	test.Use(LoggerMiddleWare)
+	test.GET("/albums", getAllAlbums)
 	router.GET("albums/:id", getAlbumById)
 	router.POST("albums", postAlbum)
 	router.DELETE("albums/:id", removeAlbumById)
 
+	// protected will use api/admin/user which will use the JWT middleware func
 	protected := router.Group("/api/admin")
 	protected.Use(middlewares.JwtAuthMiddleware())
 	protected.GET("/user", controllers.CurrentUser)
