@@ -8,6 +8,7 @@ import (
 	"web-service-gin/middlewares"
 	"web-service-gin/models"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -30,7 +31,7 @@ func main() {
 
 	models.ConnectDataBase()
 	router := gin.Default()
-
+	router.Use(cors.Default())
 	//any route which uses any of the below groups will use the relevant middleware
 	public := router.Group("/api")
 	test := router.Group("/test")
