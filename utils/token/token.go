@@ -129,7 +129,6 @@ func CheckTokenExpiration() gin.HandlerFunc {
 				c.Abort()
 				return
 			}
-
 			c.Header("Authorization", "Bearer "+newToken)
 		}
 

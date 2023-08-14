@@ -40,17 +40,23 @@ func main() {
 	router.POST("/login", controllers.Login)
 
 	// test will use /test/albums
-	// test.Use(LoggerMiddleWare)
-	router.GET("/albums", getAllAlbums)
+	router.Use(LoggerMiddleWare)
 	router.GET("albums/:id", getAlbumById)
 	router.POST("albums", postAlbum)
 	router.DELETE("albums/:id", removeAlbumById)
 
-	// protected will use api/admin/user which will use the JWT middleware func
+	// all routes in the protected group will use the jwt middleware
 	protected := router.Group("/api")
+	protected.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173/"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
 	protected.Use(middlewares.JwtAuthMiddleware())
 	protected.Use(token.CheckTokenExpiration())
-
+	protected.GET("/albums", getAllAlbums)
 	protected.GET("/user", controllers.CurrentUser)
 
 	router.Run("localhost:8080")
