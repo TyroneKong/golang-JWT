@@ -8,6 +8,8 @@ import (
 	"web-service-gin/middlewares"
 	"web-service-gin/models"
 
+	"web-service-gin/utils/token"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -33,21 +35,22 @@ func main() {
 	router := gin.Default()
 	router.Use(cors.Default())
 	//any route which uses any of the below groups will use the relevant middleware
-	public := router.Group("/api")
-	test := router.Group("/test")
-	public.POST("/register", controllers.Register)
-	public.POST("/login", controllers.Login)
+	// public := router.Group("/")
+	router.POST("/register", controllers.Register)
+	router.POST("/login", controllers.Login)
 
 	// test will use /test/albums
-	test.Use(LoggerMiddleWare)
-	test.GET("/albums", getAllAlbums)
+	// test.Use(LoggerMiddleWare)
+	router.GET("/albums", getAllAlbums)
 	router.GET("albums/:id", getAlbumById)
 	router.POST("albums", postAlbum)
 	router.DELETE("albums/:id", removeAlbumById)
 
 	// protected will use api/admin/user which will use the JWT middleware func
-	protected := router.Group("/api/admin")
+	protected := router.Group("/api")
 	protected.Use(middlewares.JwtAuthMiddleware())
+	protected.Use(token.CheckTokenExpiration())
+
 	protected.GET("/user", controllers.CurrentUser)
 
 	router.Run("localhost:8080")
