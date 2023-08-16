@@ -31,43 +31,43 @@ var albums = []album{
 }
 
 func main() {
-
-	models.ConnectDataBase()
-	router := gin.Default()
-	// router.Use(cors.Default())
-	router.Use(cors.New(cors.Config{
+	corsfunc := cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:5173"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
 		AllowHeaders:     []string{"Authorization"},
 		AllowCredentials: true,
-	}))
+	})
+	models.ConnectDataBase()
+	router := gin.Default()
+	// router.Use(cors.Default())
+	router.Use(corsfunc)
 	router.POST("/register", controllers.Register)
 	router.POST("/login", controllers.Login)
 	router.Use(LoggerMiddleWare)
 	router.GET("albums/:id", getAlbumById)
 	router.POST("albums", postAlbum)
 	router.DELETE("albums/:id", removeAlbumById)
+	router.GET("/allusers", controllers.AllUsers)
 	refresh := router.Group("/ref")
 
 	refresh.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:5173"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Authorization"},
 		AllowCredentials: true,
 	}))
+
+	refresh.OPTIONS("/refresh", func(c *gin.Context) {
+		c.Status(http.StatusOK)
+	})
 	refresh.POST("/refresh", token.RefreshToken)
 	// all routes in the protected group will use the jwt middleware
 	protected := router.Group("/api")
-
+	protected.Use(corsfunc)
 	protected.Use(middlewares.JwtAuthMiddleware())
 	// protected.Use(token.CheckTokenExpiration())
 	protected.GET("/albums", getAllAlbums)
-	protected.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
-		AllowHeaders:     []string{"Authorization"},
-		AllowCredentials: true,
-	}))
+
 	// protected.GET("/user", controllers.CurrentUser)
 	// authorized := router.Group("/auth")
 	// authorized.GET("/user", controllers.CurrentUser)

@@ -83,3 +83,15 @@ func CurrentUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "success", "data": u})
 }
+
+func AllUsers(c *gin.Context) {
+
+	u, err := models.GetAllUsers()
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "success", "data": u})
+}

@@ -30,6 +30,16 @@ func GetUserByID(uid uint) (User, error) {
 
 }
 
+func GetAllUsers() ([]User, error) {
+	var u []User
+
+	if err := DB.Find(&u).Error; err != nil {
+		return u, errors.New("no users found")
+	}
+	return u, nil
+
+}
+
 func (u *User) PrepareGive() {
 	u.Password = ""
 }
