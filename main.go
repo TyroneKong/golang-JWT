@@ -34,7 +34,7 @@ func main() {
 	corsfunc := cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:5173"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
-		AllowHeaders:     []string{"Authorization"},
+		AllowHeaders:     []string{"Origin", "Authorization", "Content-Type"},
 		AllowCredentials: true,
 	})
 	models.ConnectDataBase()
@@ -43,17 +43,22 @@ func main() {
 	router.Use(corsfunc)
 	router.POST("/register", controllers.Register)
 	router.POST("/login", controllers.Login)
+	router.GET("/allusers", middlewares.RequireAuthCookie(), controllers.AllUsers, func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Credentials", "true")
+		c.JSON(http.StatusOK, gin.H{"message": "Access granted to all users"})
+	})  
 	router.Use(LoggerMiddleWare)
 	router.GET("albums/:id", getAlbumById)
 	router.POST("albums", postAlbum)
 	router.DELETE("albums/:id", removeAlbumById)
-	router.GET("/allusers", controllers.AllUsers)
+
+	// router.GET("/allusers", controllers.AllUsers)
 	refresh := router.Group("/ref")
 
 	refresh.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:5173"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Authorization"},
+		AllowHeaders:     []string{"Origin", "Authorization", "Content-Type"},
 		AllowCredentials: true,
 	}))
 

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"time"
 	"web-service-gin/models"
 	"web-service-gin/utils/token"
 
@@ -60,6 +61,18 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "username or password is incorrect."})
 		return
 	}
+
+	// Set the token in an HTTP-only cookie
+	cookie := http.Cookie{
+		Name:     "auth_token",
+		Value:    token,
+		Path:     "/", // Cookie path
+		Expires:  time.Now().Add(24 * time.Hour),
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
+		Domain:   "localhost",
+	}
+	http.SetCookie(c.Writer, &cookie)
 
 	c.JSON(http.StatusOK, gin.H{"token": token})
 
